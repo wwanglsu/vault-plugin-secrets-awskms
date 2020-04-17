@@ -73,7 +73,7 @@ limitations by key types.
 // used to encrypt the plaintext string using the named key.
 func (b *backend) pathEncryptWrite(ctx context.Context, req *logical.Request, d *framework.FieldData) (*logical.Response, error) {
 	fmt.Println("This is test on 4/16/2020-awskms pathEncryptWrite()")
-	// key := d.Get("key").(string)
+	key := d.Get("key").(string)
 	// fmt.Println("Encrypting using awskms key: "+key)
 	// aad := d.Get("additional_authenticated_data").(string)
 	plaintext := d.Get("plaintext").(string)
@@ -83,7 +83,7 @@ func (b *backend) pathEncryptWrite(ctx context.Context, req *logical.Request, d 
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("Request body: %s\n", data)
+	fmt.Printf("awskms/encrypt/:key, Request body: %s\n", data)
 
 	/*k, err := b.Key(ctx, req.Storage, key)
 	if err != nil {
@@ -125,8 +125,8 @@ func (b *backend) pathEncryptWrite(ctx context.Context, req *logical.Request, d 
 		return nil, errwrap.Wrapf("failed to encrypt plaintext: {{err}}", err)
 	}*/
 
-	os.Setenv("AWS_ACCESS_KEY_ID","AKIAICPWGJX5GPZUPH3A")
-	os.Setenv("AWS_SECRET_ACCESS_KEY","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")
+	os.Setenv("AWS_ACCESS_KEY_ID","AKIAJYRQDOGKVOVBWUFA")
+	os.Setenv("AWS_SECRET_ACCESS_KEY","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")
 
 	// Initialize a session in us-west-2 that the SDK will use to load
 	// credentials from the shared credentials file ~/.aws/credentials.
@@ -138,13 +138,15 @@ func (b *backend) pathEncryptWrite(ctx context.Context, req *logical.Request, d 
 	// Create KMS service client
 	svc := kms.New(sess)
 	resp, err := sess.Config.Credentials.Get()
-	fmt.Println("111111",resp,err)
-	keyId := "arn:aws:kms:us-west-2:679498570023:key/0e97f126-e466-4c1f-bb70-0187b86329c4"
+	fmt.Println("awskms session config credential: ", resp, err)
+	// keyId := "arn:aws:kms:us-west-2:679498570023:key/0e97f126-e466-4c1f-bb70-0187b86329c4"
+
+	arn := "arn:aws:kms:us-west-2:679498570023:key/" + key
 
 
 	// Encrypt the data
 	result, err := svc.Encrypt(&kms.EncryptInput{
-		KeyId: aws.String(keyId),
+		KeyId: aws.String(arn),
 		Plaintext: []byte(plaintext),
 	})
 
@@ -156,7 +158,7 @@ func (b *backend) pathEncryptWrite(ctx context.Context, req *logical.Request, d 
 	fmt.Println(result.GoString())
 	fmt.Println(result.CiphertextBlob)
 	base := base64.StdEncoding.EncodeToString(result.CiphertextBlob)
-	fmt.Println("awskms encryption string: "+base)
+	fmt.Println("awskms encrypted string: "+base)
 
 	return &logical.Response{
 		Data: map[string]interface{}{

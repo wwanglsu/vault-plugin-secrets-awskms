@@ -76,7 +76,7 @@ correct version automatically.
 // used to decrypt the ciphertext string using the named key.
 func (b *backend) pathDecryptWrite(ctx context.Context, req *logical.Request, d *framework.FieldData) (*logical.Response, error) {
 	fmt.Println("This is test on 4/16/2020-awskms pathDecryptWrite()")
-	// key := d.Get("key").(string)
+	key := d.Get("key").(string)
 	// aad := d.Get("additional_authenticated_data").(string)
 	// keyVersion := d.Get("key_version").(int)
 
@@ -84,7 +84,7 @@ func (b *backend) pathDecryptWrite(ctx context.Context, req *logical.Request, d 
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("Request body: %s\n", data)
+	fmt.Printf("awskms/decrypt/%s, Request body: %s\n", key, data)
 
 	/*k, err := b.Key(ctx, req.Storage, key)
 	if err != nil {
@@ -133,8 +133,8 @@ func (b *backend) pathDecryptWrite(ctx context.Context, req *logical.Request, d 
 	}*/
 
 	var plaintext string
-	os.Setenv("AWS_ACCESS_KEY_ID","AKIAICPWGJX5GPZUPH3A")
-	os.Setenv("AWS_SECRET_ACCESS_KEY","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")
+	os.Setenv("AWS_ACCESS_KEY_ID","AKIAJYRQDOGKVOVBWUFA")
+	os.Setenv("AWS_SECRET_ACCESS_KEY","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")
 	// Initialize a session in us-west-2 that the SDK will use to load
 	// credentials from the shared credentials file ~/.aws/credentials.
 	sess, err := session.NewSession(&aws.Config{
@@ -145,7 +145,7 @@ func (b *backend) pathDecryptWrite(ctx context.Context, req *logical.Request, d 
 	// Create KMS service client
 	svc := kms.New(sess)
 	_, err = sess.Config.Credentials.Get()
-	fmt.Println("111111",d.Get("ciphertext").(string))
+	fmt.Println("awskms decryption ciphertext: ",d.Get("ciphertext").(string))
 
 	// Decrypt the data
 	result2, err := svc.Decrypt(&kms.DecryptInput{CiphertextBlob: []byte(d.Get("ciphertext").(string))})
@@ -155,7 +155,7 @@ func (b *backend) pathDecryptWrite(ctx context.Context, req *logical.Request, d 
 	}
 
 	plaintext = string(result2.Plaintext)
-	fmt.Println("Decrypted test:",plaintext)
+	fmt.Println("Decrypted test:", plaintext)
 
 	/*switch ck.Purpose {
 	case kmspb.CryptoKey_ASYMMETRIC_DECRYPT:

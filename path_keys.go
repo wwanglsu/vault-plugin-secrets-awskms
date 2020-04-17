@@ -7,11 +7,15 @@ import (
 	"sort"
 	"strings"
 	"sync"
-	"time"
+	// "time"
+	"os"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/kms"
 	"github.com/gammazero/workerpool"
-	"github.com/golang/protobuf/ptypes/duration"
-	"github.com/golang/protobuf/ptypes/timestamp"
+	// "github.com/golang/protobuf/ptypes/duration"
+	// "github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/vault/sdk/framework"
 	"github.com/hashicorp/vault/sdk/logical"
@@ -20,8 +24,8 @@ import (
 
 	multierror "github.com/hashicorp/go-multierror"
 	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
-	grpccodes "google.golang.org/grpc/codes"
-	grpcstatus "google.golang.org/grpc/status"
+	// grpccodes "google.golang.org/grpc/codes"
+	// grpcstatus "google.golang.org/grpc/status"
 )
 
 func (b *backend) pathKeys() *framework.Path {
@@ -250,10 +254,10 @@ func (b *backend) pathKeysList(ctx context.Context, req *logical.Request, d *fra
 }
 
 // pathKeysWrite corresponds to PUT/POST awskms/keys/create/:key and creates a
-// new GCP KMS key and registers it for use in Vault.
+// new AWS KMS key and registers it for use in Vault.
 func (b *backend) pathKeysWrite(ctx context.Context, req *logical.Request, d *framework.FieldData) (*logical.Response, error) {
-	fmt.Println("This is test on 4/16/2020-awskms pathKeysWrite()")
-	kmsClient, closer, err := b.KMSClient(req.Storage)
+	fmt.Println("This is test on 4/16/2020-awskms pathKeysWrite(), awskms/keys/create/:key")
+	/*kmsClient, closer, err := b.KMSClient(req.Storage)
 	if err != nil {
 		return nil, err
 	}
@@ -399,12 +403,43 @@ func (b *backend) pathKeysWrite(ctx context.Context, req *logical.Request, d *fr
 		} else {
 			return nil, errwrap.Wrapf("failed to create crypto key: {{err}}", err)
 		}
+	}*/
+
+	os.Setenv("AWS_ACCESS_KEY_ID","AKIAJYRQDOGKVOVBWUFA")
+	os.Setenv("AWS_SECRET_ACCESS_KEY","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")
+
+	// Initialize a session in us-west-2 that the SDK will use to load
+	// credentials from the shared credentials file ~/.aws/credentials.
+	sess, err := session.NewSession(&aws.Config{
+		Region: aws.String("us-west-2")},
+	)
+
+	// Create KMS service client
+	svc := kms.New(sess)
+
+	// Create the key
+	result, err := svc.CreateKey(&kms.CreateKeyInput{
+		Tags: []*kms.Tag{
+			{
+				TagKey:   aws.String("CreatedBy"),
+				TagValue: aws.String("EaaS-Vault"),
+			},
+		},
+	})
+
+	if err != nil {
+		fmt.Println("Got error creating key: ", err)
+		os.Exit(1)
 	}
+	var cmkId string
+	cmkId = *result.KeyMetadata.KeyId
+	arn := *result.KeyMetadata.Arn
+	fmt.Println(arn)
 
 	// Save it
-	entry, err := logical.StorageEntryJSON("keys/"+key, &Key{
-		Name:        key,
-		CryptoKeyID: resp.Name,
+	entry, err := logical.StorageEntryJSON("keys/"+cmkId, &Key{
+		Name:        arn,
+		CryptoKeyID: cmkId,
 	})
 	if err != nil {
 		return nil, errwrap.Wrapf("failed to create storage entry: {{err}}", err)
