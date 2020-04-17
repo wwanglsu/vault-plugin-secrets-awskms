@@ -1,4 +1,4 @@
-package gcpkms
+package awskms
 
 import (
 	"context"
@@ -9,9 +9,9 @@ import (
 	"github.com/hashicorp/vault/sdk/logical"
 )
 
-// pathConfig defines the gcpkms/config base path on the backend.
+// pathConfig defines the awskms/config base path on the backend.
 func (b *backend) pathConfig() *framework.Path {
-	fmt.Println("This is test on 4/13/2020 pathConfig()")
+	fmt.Println("This is test on 4/16/2020-awskms pathConfig()")
 	return &framework.Path{
 		Pattern: "config",
 
@@ -60,7 +60,7 @@ func (b *backend) pathConfigExists(ctx context.Context, req *logical.Request, _ 
 	return true, nil
 }
 
-// pathConfigRead corresponds to READ gcpkms/config and is used to
+// pathConfigRead corresponds to READ awskms/config and is used to
 // read the current configuration.
 func (b *backend) pathConfigRead(ctx context.Context, req *logical.Request, _ *framework.FieldData) (*logical.Response, error) {
 	c, err := b.Config(ctx, req.Storage)
@@ -75,7 +75,7 @@ func (b *backend) pathConfigRead(ctx context.Context, req *logical.Request, _ *f
 	}, nil
 }
 
-// pathConfigWrite corresponds to both CREATE and UPDATE gcpkms/config and is
+// pathConfigWrite corresponds to both CREATE and UPDATE awskms/config and is
 // used to create or update the current configuration.
 func (b *backend) pathConfigWrite(ctx context.Context, req *logical.Request, d *framework.FieldData) (*logical.Response, error) {
 	// Get the current configuration, if it exists
@@ -110,7 +110,7 @@ func (b *backend) pathConfigWrite(ctx context.Context, req *logical.Request, d *
 	return nil, nil
 }
 
-// pathConfigDelete corresponds to DELETE gcpkms/config and is used to delete
+// pathConfigDelete corresponds to DELETE awskms/config and is used to delete
 // all the configuration.
 func (b *backend) pathConfigDelete(ctx context.Context, req *logical.Request, d *framework.FieldData) (*logical.Response, error) {
 	if err := req.Storage.Delete(ctx, "config"); err != nil {

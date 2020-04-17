@@ -1,4 +1,4 @@
-package gcpkms
+package awskms
 
 import (
 	"context"
@@ -60,7 +60,7 @@ not exist at creation time.
 	}
 }
 
-// pathKeysRegisterWrite corresponds to PUT/POST gcpkms/keys/register/:key and
+// pathKeysRegisterWrite corresponds to PUT/POST awskms/keys/register/:key and
 // registers an existing GCP KMS key for use in Vault.
 func (b *backend) pathKeysRegisterWrite(ctx context.Context, req *logical.Request, d *framework.FieldData) (*logical.Response, error) {
 	key := d.Get("key").(string)

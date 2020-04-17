@@ -1,19 +1,23 @@
-package gcpkms
+package awskms
 
 import (
 	"context"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
-
-	"github.com/hashicorp/errwrap"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/kms"
+	"log"
+	// "github.com/hashicorp/errwrap"
 	"github.com/hashicorp/vault/sdk/framework"
 	"github.com/hashicorp/vault/sdk/logical"
 
-	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
+	// kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
 )
 
 func (b *backend) pathDecrypt() *framework.Path {
-	fmt.Println("This is test on 4/13/2020 pathDecrypt()")
+	fmt.Println("This is test on 4/16/2020-awskms pathDecrypt()")
 	return &framework.Path{
 		Pattern: "decrypt/" + framework.GenericNameRegex("key"),
 
@@ -67,29 +71,35 @@ correct version automatically.
 	}
 }
 
-// pathDecryptWrite corresponds to PUT/POST gcpkms/decrypt/:key and is
+// pathDecryptWrite corresponds to PUT/POST awskms/decrypt/:key and is
 // used to decrypt the ciphertext string using the named key.
 func (b *backend) pathDecryptWrite(ctx context.Context, req *logical.Request, d *framework.FieldData) (*logical.Response, error) {
-	fmt.Println("This is test on 4/13/2020 pathDecryptWrite()")
+	fmt.Println("This is test on 4/16/2020-awskms pathDecryptWrite()")
 	key := d.Get("key").(string)
-	aad := d.Get("additional_authenticated_data").(string)
-	keyVersion := d.Get("key_version").(int)
+	// aad := d.Get("additional_authenticated_data").(string)
+	// keyVersion := d.Get("key_version").(int)
 
-	k, err := b.Key(ctx, req.Storage, key)
+	data, err := json.Marshal(req)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("awskms/decrypt/%s, Request body: %s\n", key, data)
+
+	/*k, err := b.Key(ctx, req.Storage, key)
 	if err != nil {
 		if err == ErrKeyNotFound {
 			return logical.ErrorResponse(err.Error()), logical.ErrInvalidRequest
 		}
 		return nil, err
-	}
+	}*/
 
 	// We gave the user back base64-encoded ciphertext in the /encrypt payload
-	ciphertext, err := base64.StdEncoding.DecodeString(d.Get("ciphertext").(string))
+	/*ciphertext, err := base64.StdEncoding.DecodeString(d.Get("ciphertext").(string))
 	if err != nil {
 		return nil, errwrap.Wrapf("failed to base64 decode ciphtertext: {{err}}", err)
-	}
+	}*/
 
-	cryptoKey := k.CryptoKeyID
+	/*cryptoKey := k.CryptoKeyID
 	if keyVersion > 0 {
 		if k.MinVersion > 0 && keyVersion < k.MinVersion {
 			resp := fmt.Sprintf("requested version %d is less than minimum allowed version of %d",
@@ -104,26 +114,50 @@ func (b *backend) pathDecryptWrite(ctx context.Context, req *logical.Request, d 
 		}
 
 		cryptoKey = fmt.Sprintf("%s/cryptoKeyVersions/%d", cryptoKey, keyVersion)
-	}
+	}*/
 
-	kmsClient, closer, err := b.KMSClient(req.Storage)
+	/*kmsClient, closer, err := b.KMSClient(req.Storage)
 	if err != nil {
 		return nil, err
 	}
-	defer closer()
+	defer closer()*/
 
 	// Lookup the key so we can determine the type of decryption (symmetric or
 	// asymmetric).
-	ck, err := kmsClient.GetCryptoKey(ctx, &kmspb.GetCryptoKeyRequest{
+	/*ck, err := kmsClient.GetCryptoKey(ctx, &kmspb.GetCryptoKeyRequest{
 		Name: k.CryptoKeyID,
 	})
 	if err != nil {
 		return nil, errwrap.Wrapf("failed to get underlying crypto key: {{err}}", err)
-	}
+	}*/
 
 	var plaintext string
+	// Initialize a session in us-west-2 that the SDK will use to load
+	// credentials from the shared credentials file ~/.aws/credentials.
+	sess, err := session.NewSession(&aws.Config{
+		Region: aws.String("us-west-2"),
+		CredentialsChainVerboseErrors:aws.Bool(true)},
+	)
 
-	switch ck.Purpose {
+	// Create KMS service client
+	svc := kms.New(sess)
+	_, err = sess.Config.Credentials.Get()
+	ciphertext := d.Get("ciphertext").(string)
+	decodedCiphertext, err := base64.StdEncoding.DecodeString(ciphertext)
+
+	fmt.Println("awskms decryption ciphertext: ", ciphertext)
+
+	// Decrypt the data
+	result2, err := svc.Decrypt(&kms.DecryptInput{CiphertextBlob: decodedCiphertext})
+
+	if err != nil {
+		fmt.Println("Got error from aws kms decrypting data: ", err)
+	}
+
+	plaintext = string(result2.Plaintext)
+	fmt.Println("Decrypted test:", plaintext)
+
+	/*switch ck.Purpose {
 	case kmspb.CryptoKey_ASYMMETRIC_DECRYPT:
 		if keyVersion == 0 {
 			return nil, errMissingFields("key_version")
@@ -149,11 +183,12 @@ func (b *backend) pathDecryptWrite(ctx context.Context, req *logical.Request, d 
 		plaintext = string(resp.Plaintext)
 	case kmspb.CryptoKey_ASYMMETRIC_SIGN:
 		return nil, logical.ErrUnsupportedOperation
-	}
+	}*/
 
 	return &logical.Response{
 		Data: map[string]interface{}{
 			"plaintext": plaintext,
+			"arn": result2.KeyId,
 		},
 	}, nil
 }

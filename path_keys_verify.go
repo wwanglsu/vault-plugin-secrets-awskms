@@ -1,4 +1,4 @@
-package gcpkms
+package awskms
 
 import (
 	"context"
@@ -70,7 +70,7 @@ Base64-encoded signature to use for verification. This field is required.
 	}
 }
 
-// pathVerifyWrite corresponds to PUT/POST gcpkms/sign/:key and is used to
+// pathVerifyWrite corresponds to PUT/POST awskms/sign/:key and is used to
 // verify the digest using the named key.
 func (b *backend) pathVerifyWrite(ctx context.Context, req *logical.Request, d *framework.FieldData) (*logical.Response, error) {
 	key := d.Get("key").(string)

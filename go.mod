@@ -1,10 +1,11 @@
-module github.com/wwanglsu/vault-plugin-secrets-gcpkms
+module github.com/wwanglsu/vault-plugin-secrets-awskms
 
 go 1.12
 
 require (
 	cloud.google.com/go v0.39.0
 	github.com/armon/go-radix v1.0.0 // indirect
+	github.com/aws/aws-sdk-go v1.25.37
 	github.com/gammazero/deque v0.0.0-20190130191400-2afb3858e9c7 // indirect
 	github.com/gammazero/workerpool v0.0.0-20190406235159-88d534f22b56
 	github.com/golang/protobuf v1.3.2

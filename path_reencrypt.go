@@ -1,4 +1,4 @@
-package gcpkms
+package awskms
 
 import (
 	"context"
@@ -64,7 +64,7 @@ unspecified, this defaults to the latest active crypto key version.
 	}
 }
 
-// pathReencryptWrite corresponds to PUT/POST gcpkms/reencrypt/:key and is
+// pathReencryptWrite corresponds to PUT/POST awskms/reencrypt/:key and is
 // used to re-encrypt the given ciphertext to the latest cryptokey version.
 func (b *backend) pathReencryptWrite(ctx context.Context, req *logical.Request, d *framework.FieldData) (*logical.Response, error) {
 	key := d.Get("key").(string)

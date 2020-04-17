@@ -1,6 +1,6 @@
 GOMAXPROCS = 4
 
-PROJECT    = "github.com/wwanglsu/vault-plugin-secrets-gcpkms"
+PROJECT    = "github.com/wwanglsu/vault-plugin-secrets-awskms"
 NAME       = $(shell go run version/cmd/main.go name)
 VERSION    = $(shell go run version/cmd/main.go version)
 COMMIT     = $(shell git rev-parse --short HEAD)

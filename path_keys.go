@@ -1,4 +1,4 @@
-package gcpkms
+package awskms
 
 import (
 	"context"
@@ -7,11 +7,13 @@ import (
 	"sort"
 	"strings"
 	"sync"
-	"time"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/kms"
 	"github.com/gammazero/workerpool"
-	"github.com/golang/protobuf/ptypes/duration"
-	"github.com/golang/protobuf/ptypes/timestamp"
+	// "github.com/golang/protobuf/ptypes/duration"
+	// "github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/vault/sdk/framework"
 	"github.com/hashicorp/vault/sdk/logical"
@@ -20,12 +22,12 @@ import (
 
 	multierror "github.com/hashicorp/go-multierror"
 	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
-	grpccodes "google.golang.org/grpc/codes"
-	grpcstatus "google.golang.org/grpc/status"
+	// grpccodes "google.golang.org/grpc/codes"
+	// grpcstatus "google.golang.org/grpc/status"
 )
 
 func (b *backend) pathKeys() *framework.Path {
-	fmt.Println("This is test on 4/13/2020 pathKeys()")
+	fmt.Println("This is test on 4/16/2020-awskms pathKeys()")
 	return &framework.Path{
 		Pattern: "keys/?$",
 
@@ -39,7 +41,7 @@ func (b *backend) pathKeys() *framework.Path {
 }
 
 func (b *backend) pathKeysCRUD() *framework.Path {
-	fmt.Println("This is test on 4/13/2020 pathKeysCRUD()")
+	fmt.Println("This is test on 4/16/2020-awskms pathKeysCRUD()")
 	return &framework.Path{
 		Pattern: "keys/" + framework.GenericNameRegex("key"),
 
@@ -52,7 +54,7 @@ the name of the key and the configured parameters below. Vault will also create
 or modify the underlying Google Cloud KMS crypto key and store a reference to
 it.
 
-    $ vault write gcpkms/keys/my-key \
+    $ vault write awskms/keys/my-key \
         key_ring="projects/my-project/locations/global/keyRings/vault" \
         rotation_period="72h" \
         labels="test=true"
@@ -60,14 +62,14 @@ it.
 To read data about a Google Cloud KMS crypto key, including the key status and
 current primary key version, read from the path:
 
-    $ vault read gcpkms/keys/my-key
+    $ vault read awskms/keys/my-key
 
 To delete a key from both Vault and Google Cloud KMS, perform a delete operation
 on the name of the key. This will disable automatic rotation of the key in
 Google Cloud KMS, disable all crypto key versions for this crypto key in Google
 Cloud KMS, and delete Vault's reference to the crypto key.
 
-    $ vault delete gcpkms/keys/my-key
+    $ vault delete awskms/keys/my-key
 
 For more information about any of the options, please see the parameter
 documentation below. `,
@@ -183,7 +185,7 @@ func (b *backend) pathKeysExistenceCheck(ctx context.Context, req *logical.Reque
 	return true, nil
 }
 
-// pathKeysRead corresponds to GET gcpkms/keys/:name and is used to show
+// pathKeysRead corresponds to GET awskms/keys/:name and is used to show
 // information about the key.
 func (b *backend) pathKeysRead(ctx context.Context, req *logical.Request, d *framework.FieldData) (*logical.Response, error) {
 	key := d.Get("key").(string)
@@ -239,7 +241,7 @@ func (b *backend) pathKeysRead(ctx context.Context, req *logical.Request, d *fra
 	}, nil
 }
 
-// pathKeysList corresponds to LIST gcpkms/keys and is used to list all keys
+// pathKeysList corresponds to LIST awskms/keys and is used to list all keys
 // in the system.
 func (b *backend) pathKeysList(ctx context.Context, req *logical.Request, d *framework.FieldData) (*logical.Response, error) {
 	keys, err := b.Keys(ctx, req.Storage)
@@ -249,11 +251,11 @@ func (b *backend) pathKeysList(ctx context.Context, req *logical.Request, d *fra
 	return logical.ListResponse(keys), nil
 }
 
-// pathKeysWrite corresponds to PUT/POST gcpkms/keys/create/:key and creates a
-// new GCP KMS key and registers it for use in Vault.
+// pathKeysWrite corresponds to PUT/POST awskms/keys/create/:key and creates a
+// new AWS KMS key and registers it for use in Vault.
 func (b *backend) pathKeysWrite(ctx context.Context, req *logical.Request, d *framework.FieldData) (*logical.Response, error) {
-	fmt.Println("This is test on 4/13/2020 pathKeysWrite()")
-	kmsClient, closer, err := b.KMSClient(req.Storage)
+	fmt.Println("This is test on 4/16/2020-awskms pathKeysWrite(), awskms/keys/create/:key")
+	/*kmsClient, closer, err := b.KMSClient(req.Storage)
 	if err != nil {
 		return nil, err
 	}
@@ -399,12 +401,39 @@ func (b *backend) pathKeysWrite(ctx context.Context, req *logical.Request, d *fr
 		} else {
 			return nil, errwrap.Wrapf("failed to create crypto key: {{err}}", err)
 		}
+	}*/
+
+	// Initialize a session in us-west-2 that the SDK will use to load
+	// credentials from the shared credentials file ~/.aws/credentials.
+	sess, err := session.NewSession(&aws.Config{
+		Region: aws.String("us-west-2")},
+	)
+
+	// Create KMS service client
+	svc := kms.New(sess)
+
+	// Create the key
+	result, err := svc.CreateKey(&kms.CreateKeyInput{
+		Tags: []*kms.Tag{
+			{
+				TagKey:   aws.String("CreatedBy"),
+				TagValue: aws.String("EaaS-Vault"),
+			},
+		},
+	})
+
+	if err != nil {
+		fmt.Println("Got error creating key: ", err)
 	}
+	var cmkId string
+	cmkId = *result.KeyMetadata.KeyId
+	arn := *result.KeyMetadata.Arn
+	fmt.Println(arn)
 
 	// Save it
-	entry, err := logical.StorageEntryJSON("keys/"+key, &Key{
-		Name:        key,
-		CryptoKeyID: resp.Name,
+	entry, err := logical.StorageEntryJSON("keys/"+cmkId, &Key{
+		Name:        arn,
+		CryptoKeyID: cmkId,
 	})
 	if err != nil {
 		return nil, errwrap.Wrapf("failed to create storage entry: {{err}}", err)
@@ -413,10 +442,15 @@ func (b *backend) pathKeysWrite(ctx context.Context, req *logical.Request, d *fr
 		return nil, errwrap.Wrapf("failed to write to storage: {{err}}", err)
 	}
 
-	return nil, nil
+	return &logical.Response{
+		Data: map[string]interface{}{
+			"keyId": cmkId,
+			"arn": arn,
+		},
+	}, nil
 }
 
-// pathKeysDelete corresponds to PUT/POST gcpkms/keys/delete/:key and deletes an
+// pathKeysDelete corresponds to PUT/POST awskms/keys/delete/:key and deletes an
 // existing GCP KMS key and deregisters it from Vault.
 func (b *backend) pathKeysDelete(ctx context.Context, req *logical.Request, d *framework.FieldData) (*logical.Response, error) {
 	kmsClient, closer, err := b.KMSClient(req.Storage)

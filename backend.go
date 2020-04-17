@@ -1,4 +1,4 @@
-package gcpkms
+package awskms
 
 import (
 	"context"
@@ -46,6 +46,7 @@ type backend struct {
 // Factory returns a configured instance of the backend.
 func Factory(ctx context.Context, c *logical.BackendConfig) (logical.Backend, error) {
 	b := Backend()
+
 	if err := b.Setup(ctx, c); err != nil {
 		return nil, err
 	}
@@ -86,7 +87,7 @@ func Backend() *backend {
 		Invalidate: b.invalidate,
 		Clean:      b.clean,
 	}
-	fmt.Println("This is test on 4/13/2020 Backend()")
+	fmt.Println("This is test on 4/16/2020-awskms Backend()")
 	return &b
 }
 

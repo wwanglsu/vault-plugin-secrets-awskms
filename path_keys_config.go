@@ -1,4 +1,4 @@
-package gcpkms
+package awskms
 
 import (
 	"context"
@@ -57,7 +57,7 @@ negative value, there is no maximum key version.
 	}
 }
 
-// pathKeysConfigRead corresponds to GET gcpkms/keys/config/:name and is used to
+// pathKeysConfigRead corresponds to GET awskms/keys/config/:name and is used to
 // show information about the key configuration in Vault.
 func (b *backend) pathKeysConfigRead(ctx context.Context, req *logical.Request, d *framework.FieldData) (*logical.Response, error) {
 	key := d.Get("key").(string)
@@ -88,7 +88,7 @@ func (b *backend) pathKeysConfigRead(ctx context.Context, req *logical.Request, 
 	}, nil
 }
 
-// pathKeysConfigWrite corresponds to PUT/POST gcpkms/keys/config/:key and
+// pathKeysConfigWrite corresponds to PUT/POST awskms/keys/config/:key and
 // configures information about the key in Vault.
 func (b *backend) pathKeysConfigWrite(ctx context.Context, req *logical.Request, d *framework.FieldData) (*logical.Response, error) {
 	key := d.Get("key").(string)

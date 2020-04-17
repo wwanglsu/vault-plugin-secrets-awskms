@@ -1,4 +1,4 @@
-package gcpkms
+package awskms
 
 import (
 	"context"
@@ -52,7 +52,7 @@ point to a valid Google Cloud KMS crypto key.
 	}
 }
 
-// pathKeysRotateWrite corresponds to PUT/POST gcpkms/keys/rotate/:name and is
+// pathKeysRotateWrite corresponds to PUT/POST awskms/keys/rotate/:name and is
 // used to create a new underlying GCP KMS crypto key version and set that
 // version to the primary for future encryption.
 func (b *backend) pathKeysRotateWrite(ctx context.Context, req *logical.Request, d *framework.FieldData) (*logical.Response, error) {

@@ -4,7 +4,7 @@ import "fmt"
 
 const (
 	// Name is the name of the plugin.
-	Name = "vault-plugin-secrets-gcpkms"
+	Name = "vault-plugin-secrets-awskms"
 
 	// Version is the version of the release.
 	Version = "0.0.1"

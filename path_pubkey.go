@@ -1,4 +1,4 @@
-package gcpkms
+package awskms
 
 import (
 	"context"
@@ -45,7 +45,7 @@ This field is required.
 	}
 }
 
-// pathPubkeyRead corresponds to GET gcpkms/pubkey/:key and is used to read the
+// pathPubkeyRead corresponds to GET awskms/pubkey/:key and is used to read the
 // public key contents of the crypto key version.
 func (b *backend) pathPubkeyRead(ctx context.Context, req *logical.Request, d *framework.FieldData) (*logical.Response, error) {
 	key := d.Get("key").(string)

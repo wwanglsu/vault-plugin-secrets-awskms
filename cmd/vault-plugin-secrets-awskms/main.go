@@ -5,14 +5,14 @@ import (
 	"os"
 
 	hclog "github.com/hashicorp/go-hclog"
-	gcpkms "github.com/wwanglsu/vault-plugin-secrets-gcpkms"
+	awskms "github.com/wwanglsu/vault-plugin-secrets-awskms"
 	"github.com/hashicorp/vault/api"
 	"github.com/hashicorp/vault/sdk/plugin"
 )
 
 func main() {
 	logger := hclog.New(&hclog.LoggerOptions{})
-	fmt.Println("This is test on 4/13/2020 main()")
+	fmt.Println("This is test on 4/16/2020-awskms from vault-plugin-secrets-awskms main()")
 	defer func() {
 		if r := recover(); r != nil {
 			logger.Error("plugin paniced", "error", r)
@@ -29,7 +29,7 @@ func main() {
 	tlsProviderFunc := api.VaultPluginTLSProvider(tlsConfig)
 
 	if err := plugin.Serve(&plugin.ServeOpts{
-		BackendFactoryFunc: gcpkms.Factory,
+		BackendFactoryFunc: awskms.Factory,
 		TLSProviderFunc:    tlsProviderFunc,
 	}); err != nil {
 		logger.Error("plugin shutting down", "error", err)
