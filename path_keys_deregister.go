@@ -1,4 +1,4 @@
-package gcpkms
+package awskms
 
 import (
 	"context"
@@ -36,7 +36,7 @@ it will be left untouched.
 	}
 }
 
-// pathKeysDeregisterWrite corresponds to POST gcpkms/keys/deregister/:key
+// pathKeysDeregisterWrite corresponds to POST awskms/keys/deregister/:key
 // and deregisters a key for use in Vault. It does not delete or disable the
 // underlying GCP KMS keys.
 func (b *backend) pathKeysDeregisterWrite(ctx context.Context, req *logical.Request, d *framework.FieldData) (*logical.Response, error) {

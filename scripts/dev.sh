@@ -8,7 +8,7 @@ pkill vault || true
 
 make dev
 mkdir -p bin/
-cp "$GOPATH/bin/vault-plugin-secrets-gcpkms" bin/
+cp "$GOPATH/bin/vault-plugin-secrets-awskms" bin/
 
 vault server \
   -log-level=warn \
@@ -17,4 +17,4 @@ vault server \
 VAULT_PID=$!
 sleep 2
 
-vault secrets enable -path=gcpkms -plugin-name=vault-plugin-secrets-gcpkms plugin
+vault secrets enable -path=awskms -plugin-name=vault-plugin-secrets-awskms plugin

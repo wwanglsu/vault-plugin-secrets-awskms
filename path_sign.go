@@ -1,4 +1,4 @@
-package gcpkms
+package awskms
 
 import (
 	"context"
@@ -56,7 +56,7 @@ required.
 	}
 }
 
-// pathSignWrite corresponds to PUT/POST gcpkms/sign/:key and is used to sign
+// pathSignWrite corresponds to PUT/POST awskms/sign/:key and is used to sign
 // the digest using the named key.
 func (b *backend) pathSignWrite(ctx context.Context, req *logical.Request, d *framework.FieldData) (*logical.Response, error) {
 	key := d.Get("key").(string)

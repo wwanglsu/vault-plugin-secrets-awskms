@@ -1,7 +1,5 @@
 # Vault Secrets Engine for Google Cloud KMS
 
-[![Build Status](https://travis-ci.com/hashicorp/vault-plugin-secrets-gcpkms.svg?token=xjv5yxmcgdD1zvpeR4me&branch=master)](https://travis-ci.com/hashicorp/vault-plugin-secrets-gcpkms)
-
 This is a plugin backend for [HashiCorp Vault][vault] that manages [Google Cloud
 KMS][kms] keys and provides pass-through encryption/decryption of data through
 KMS.
@@ -17,19 +15,19 @@ The Google Cloud KMS Vault secrets engine is automatically bundled and included
 in [Vault][vault] distributions. To activate the plugin, run:
 
 ```text
-$ vault secrets enable gcpkms
+$ vault secrets enable awskms
 ```
 
 Optionally configure the backend with GCP credentials:
 
 ```text
-$ vault write gcpkms/config credentials="..."
+$ vault write awskms/config credentials="..."
 ```
 
 Ask Vault to generate a new Google Cloud KMS key:
 
 ```text
-$ vault write gcpkms/keys/my-key \
+$ vault write awskms/keys/my-key \
     key_ring=projects/my-project/locations/global/keyRings/my-keyring \
     crypto_key=my-crypto-key
 ```
@@ -40,13 +38,13 @@ encrypted/decrypted with that key.
 Encrypt some data:
 
 ```text
-$ vault write gcpkms/encrypt/my-key plaintext="hello world"
+$ vault write awskms/encrypt/my-key plaintext="hello world"
 ```
 
 Decrypt the data:
 
 ```text
-$ vault write gcpkms/decrypt/my-key ciphertext="..."
+$ vault write awskms/decrypt/my-key ciphertext="..."
 ```
 
 
@@ -61,8 +59,8 @@ instructions are only useful if you want to develop against the plugin.**
 1. Clone the repo:
 
     ```text
-    $ git clone https://github.com/hashicorp/vault-plugin-secrets-gcpkms
-    $ cd vault-plugin-secrets-gcpkms
+    $ git clone https://github.com/wwanglsu/vault-plugin-secrets-awskms
+    $ cd vault-plugin-secrets-awskms
     ```
 
 1. Build the binary:
@@ -74,14 +72,14 @@ instructions are only useful if you want to develop against the plugin.**
 1. Copy the compiled binary into a scratch dir:
 
     ```text
-    $ cp $(which vault-plugin-secrets-gcpkms) ./bin/
+    $ cp $(which vault-plugin-secrets-awskms) ./bin/
     ```
 
 1. Run Vault plugins from that directory:
 
     ```text
     $ vault server -dev -dev-plugin-dir=./bin
-    $ vault secrets enable -path=gcpkms -plugin-name=vault-plugin-secrets-gcpkms plugin
+    $ vault secrets enable -path=awskms -plugin-name=vault-plugin-secrets-awskms plugin
     ```
 
 ### Documentation

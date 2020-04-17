@@ -1,4 +1,4 @@
-package gcpkms
+package awskms
 
 import (
 	"context"
@@ -29,12 +29,12 @@ older than the key's min_version. If min_version is unset, no keys are deleted.
 To trim a collection of keys, first decide on the minimum version which you want
 to allow:
 
-    $ vault write gcpkms/keys/config/my-key \
+    $ vault write awskms/keys/config/my-key \
         min_version=42
 
 Then execute the trim call:
 
-    $ vault write -f gcpkms/keys/trim/my-key
+    $ vault write -f awskms/keys/trim/my-key
 
 This will delete all crypto key versions from Google Cloud KMS which are older
 than the specified version (version 42 in this example). Note that this will
@@ -61,7 +61,7 @@ Name of the key in Vault.
 	}
 }
 
-// pathKeysTrimWrite corresponds to PUT/POST/DELETE gcpkms/keys/trim/:key and
+// pathKeysTrimWrite corresponds to PUT/POST/DELETE awskms/keys/trim/:key and
 // deletes all crypto key versions from Google Cloud KMS which are older than
 // the key's min_version.
 func (b *backend) pathKeysTrimWrite(ctx context.Context, req *logical.Request, d *framework.FieldData) (*logical.Response, error) {

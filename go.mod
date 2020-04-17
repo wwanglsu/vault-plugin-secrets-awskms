@@ -1,4 +1,4 @@
-module github.com/wwanglsu/vault-plugin-secrets-gcpkms
+module github.com/wwanglsu/vault-plugin-secrets-awskms
 
 go 1.12
 

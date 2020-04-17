@@ -1,4 +1,4 @@
-package gcpkms
+package awskms
 
 import (
 	"context"
@@ -128,7 +128,7 @@ func testCreateKMSKeyRing(tb testing.TB, name string) (string, func()) {
 }
 
 // testCreateKMSCryptoKeySymmetric creates a new crypto key under the
-// vault-gcpkms-plugin-test key ring in the given google project.
+// vault-awskms-plugin-test key ring in the given google project.
 func testCreateKMSCryptoKeySymmetric(tb testing.TB) (string, func()) {
 	return testCreateKMSCryptoKeyPurpose(tb,
 		kmspb.CryptoKey_ENCRYPT_DECRYPT,

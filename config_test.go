@@ -1,4 +1,4 @@
-package gcpkms
+package awskms
 
 import (
 	"reflect"
