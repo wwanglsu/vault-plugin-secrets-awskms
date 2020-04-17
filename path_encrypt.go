@@ -73,11 +73,11 @@ limitations by key types.
 // used to encrypt the plaintext string using the named key.
 func (b *backend) pathEncryptWrite(ctx context.Context, req *logical.Request, d *framework.FieldData) (*logical.Response, error) {
 	fmt.Println("This is test on 4/16/2020-awskms pathEncryptWrite()")
-	key := d.Get("key").(string)
-	fmt.Println("Encrypting using awskms key: "+key)
+	// key := d.Get("key").(string)
+	// fmt.Println("Encrypting using awskms key: "+key)
 	// aad := d.Get("additional_authenticated_data").(string)
 	plaintext := d.Get("plaintext").(string)
-	keyVersion := d.Get("key_version").(int)
+	// keyVersion := d.Get("key_version").(int)
 
 	data, err := json.Marshal(req)
 	if err != nil {
@@ -85,15 +85,15 @@ func (b *backend) pathEncryptWrite(ctx context.Context, req *logical.Request, d 
 	}
 	fmt.Printf("Request body: %s\n", data)
 
-	k, err := b.Key(ctx, req.Storage, key)
+	/*k, err := b.Key(ctx, req.Storage, key)
 	if err != nil {
 		if err == ErrKeyNotFound {
 			return logical.ErrorResponse(err.Error()), logical.ErrInvalidRequest
 		}
 		return nil, err
-	}
+	}*/
 
-	cryptoKey := k.CryptoKeyID
+	/*cryptoKey := k.CryptoKeyID
 	if keyVersion > 0 {
 		if k.MinVersion > 0 && keyVersion < k.MinVersion {
 			resp := fmt.Sprintf("requested version %d is less than minimum allowed version of %d",
@@ -108,7 +108,7 @@ func (b *backend) pathEncryptWrite(ctx context.Context, req *logical.Request, d 
 		}
 
 		cryptoKey = fmt.Sprintf("%s/cryptoKeyVersions/%d", cryptoKey, keyVersion)
-	}
+	}*/
 
 	/*kmsClient, closer, err := b.KMSClient(req.Storage)
 	if err != nil {

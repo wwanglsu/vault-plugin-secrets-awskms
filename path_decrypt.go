@@ -76,10 +76,9 @@ correct version automatically.
 // used to decrypt the ciphertext string using the named key.
 func (b *backend) pathDecryptWrite(ctx context.Context, req *logical.Request, d *framework.FieldData) (*logical.Response, error) {
 	fmt.Println("This is test on 4/16/2020-awskms pathDecryptWrite()")
-	key := d.Get("key").(string)
-	aad := d.Get("additional_authenticated_data").(string)
-	fmt.Println("additional_authenticated_data: ", aad)
-	keyVersion := d.Get("key_version").(int)
+	// key := d.Get("key").(string)
+	// aad := d.Get("additional_authenticated_data").(string)
+	// keyVersion := d.Get("key_version").(int)
 
 	data, err := json.Marshal(req)
 	if err != nil {
@@ -87,13 +86,13 @@ func (b *backend) pathDecryptWrite(ctx context.Context, req *logical.Request, d 
 	}
 	fmt.Printf("Request body: %s\n", data)
 
-	k, err := b.Key(ctx, req.Storage, key)
+	/*k, err := b.Key(ctx, req.Storage, key)
 	if err != nil {
 		if err == ErrKeyNotFound {
 			return logical.ErrorResponse(err.Error()), logical.ErrInvalidRequest
 		}
 		return nil, err
-	}
+	}*/
 
 	// We gave the user back base64-encoded ciphertext in the /encrypt payload
 	/*ciphertext, err := base64.StdEncoding.DecodeString(d.Get("ciphertext").(string))
@@ -101,7 +100,7 @@ func (b *backend) pathDecryptWrite(ctx context.Context, req *logical.Request, d 
 		return nil, errwrap.Wrapf("failed to base64 decode ciphtertext: {{err}}", err)
 	}*/
 
-	cryptoKey := k.CryptoKeyID
+	/*cryptoKey := k.CryptoKeyID
 	if keyVersion > 0 {
 		if k.MinVersion > 0 && keyVersion < k.MinVersion {
 			resp := fmt.Sprintf("requested version %d is less than minimum allowed version of %d",
@@ -116,7 +115,7 @@ func (b *backend) pathDecryptWrite(ctx context.Context, req *logical.Request, d 
 		}
 
 		cryptoKey = fmt.Sprintf("%s/cryptoKeyVersions/%d", cryptoKey, keyVersion)
-	}
+	}*/
 
 	/*kmsClient, closer, err := b.KMSClient(req.Storage)
 	if err != nil {
