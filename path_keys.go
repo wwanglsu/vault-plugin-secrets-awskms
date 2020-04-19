@@ -448,7 +448,11 @@ func (b *backend) pathKeysWrite(ctx context.Context, req *logical.Request, d *fr
 		return nil, errwrap.Wrapf("failed to write to storage: {{err}}", err)
 	}
 
-	return nil, nil
+	return &logical.Response{
+		Data: map[string]interface{}{
+			"keyId": cmkId,
+		},
+	}, nil
 }
 
 // pathKeysDelete corresponds to PUT/POST awskms/keys/delete/:key and deletes an
