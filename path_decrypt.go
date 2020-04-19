@@ -2,6 +2,7 @@ package awskms
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -145,10 +146,13 @@ func (b *backend) pathDecryptWrite(ctx context.Context, req *logical.Request, d 
 	// Create KMS service client
 	svc := kms.New(sess)
 	_, err = sess.Config.Credentials.Get()
-	fmt.Println("awskms decryption ciphertext: ",d.Get("ciphertext").(string))
+	ciphertext := d.Get("ciphertext").(string)
+	decodedCiphertext, err := base64.StdEncoding.DecodeString(ciphertext)
+
+	fmt.Println("awskms decryption ciphertext: ", ciphertext)
 
 	// Decrypt the data
-	result2, err := svc.Decrypt(&kms.DecryptInput{CiphertextBlob: []byte(d.Get("ciphertext").(string))})
+	result2, err := svc.Decrypt(&kms.DecryptInput{CiphertextBlob: decodedCiphertext})
 
 	if err != nil {
 		fmt.Println("Got error from aws kms decrypting data: ", err)
