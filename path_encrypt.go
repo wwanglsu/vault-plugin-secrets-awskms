@@ -5,12 +5,10 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"log"
-	"os"
-
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/kms"
-	"github.com/aws/aws-sdk-go/aws"
+	"log"
 	// "github.com/hashicorp/errwrap"
 	"github.com/hashicorp/vault/sdk/framework"
 	"github.com/hashicorp/vault/sdk/logical"
@@ -125,9 +123,6 @@ func (b *backend) pathEncryptWrite(ctx context.Context, req *logical.Request, d 
 		return nil, errwrap.Wrapf("failed to encrypt plaintext: {{err}}", err)
 	}*/
 
-	os.Setenv("AWS_ACCESS_KEY_ID","AKIAJYRQDOGKVOVBWUFA")
-	os.Setenv("AWS_SECRET_ACCESS_KEY","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")
-
 	// Initialize a session in us-west-2 that the SDK will use to load
 	// credentials from the shared credentials file ~/.aws/credentials.
 	sess, err := session.NewSession(&aws.Config{
@@ -142,7 +137,6 @@ func (b *backend) pathEncryptWrite(ctx context.Context, req *logical.Request, d 
 	// keyId := "arn:aws:kms:us-west-2:679498570023:key/0e97f126-e466-4c1f-bb70-0187b86329c4"
 
 	arn := "arn:aws:kms:us-west-2:679498570023:key/" + key
-
 
 	// Encrypt the data
 	result, err := svc.Encrypt(&kms.EncryptInput{
@@ -162,7 +156,7 @@ func (b *backend) pathEncryptWrite(ctx context.Context, req *logical.Request, d 
 
 	return &logical.Response{
 		Data: map[string]interface{}{
-			"key_id": result.KeyId,
+			"arn": result.KeyId,
 			"ciphertext":  base,
 		},
 	}, nil

@@ -7,8 +7,6 @@ import (
 	"sort"
 	"strings"
 	"sync"
-	// "time"
-	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -405,9 +403,6 @@ func (b *backend) pathKeysWrite(ctx context.Context, req *logical.Request, d *fr
 		}
 	}*/
 
-	os.Setenv("AWS_ACCESS_KEY_ID","AKIAJYRQDOGKVOVBWUFA")
-	os.Setenv("AWS_SECRET_ACCESS_KEY","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")
-
 	// Initialize a session in us-west-2 that the SDK will use to load
 	// credentials from the shared credentials file ~/.aws/credentials.
 	sess, err := session.NewSession(&aws.Config{
@@ -429,7 +424,6 @@ func (b *backend) pathKeysWrite(ctx context.Context, req *logical.Request, d *fr
 
 	if err != nil {
 		fmt.Println("Got error creating key: ", err)
-		os.Exit(1)
 	}
 	var cmkId string
 	cmkId = *result.KeyMetadata.KeyId
@@ -451,6 +445,7 @@ func (b *backend) pathKeysWrite(ctx context.Context, req *logical.Request, d *fr
 	return &logical.Response{
 		Data: map[string]interface{}{
 			"keyId": cmkId,
+			"arn": arn,
 		},
 	}, nil
 }
