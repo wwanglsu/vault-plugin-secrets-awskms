@@ -134,7 +134,6 @@ func (b *backend) pathEncryptWrite(ctx context.Context, req *logical.Request, d 
 	svc := kms.New(sess)
 	resp, err := sess.Config.Credentials.Get()
 	fmt.Println("awskms session config credential: ", resp, err)
-	// keyId := "arn:aws:kms:us-west-2:679498570023:key/0e97f126-e466-4c1f-bb70-0187b86329c4"
 
 	arn := "arn:aws:kms:us-west-2:679498570023:key/" + key
 
